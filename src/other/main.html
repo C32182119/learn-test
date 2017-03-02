@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>2048</title>
+    <link href="view.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript" src="support.js"></script>
+    <script type="text/javascript" src="animation.js"></script>
+    <script type="text/javascript" src="game.js"></script>
+    <script type="text/javascript" src="ai.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>2048</h1>
+        <a href="javascript:newGame();" id="btn_newgame">New Game</a>
+        <a href="javascript:autoPlay();" id="btn_autoplay">Auto Play</a>
+        <p>score: <span id="score">0</span></p>
+		<a href="javascript:main.init();">Test</a>
+    </header>
+    <div class="grid-container">
+        <div class="grid-cell" id="grid-cell-0-0"></div>
+        <div class="grid-cell" id="grid-cell-0-1"></div>
+        <div class="grid-cell" id="grid-cell-0-2"></div>
+        <div class="grid-cell" id="grid-cell-0-3"></div>
+
+        <div class="grid-cell" id="grid-cell-1-0"></div>
+        <div class="grid-cell" id="grid-cell-1-1"></div>
+        <div class="grid-cell" id="grid-cell-1-2"></div>
+        <div class="grid-cell" id="grid-cell-1-3"></div>
+
+        <div class="grid-cell" id="grid-cell-2-0"></div>
+        <div class="grid-cell" id="grid-cell-2-1"></div>
+        <div class="grid-cell" id="grid-cell-2-2"></div>
+        <div class="grid-cell" id="grid-cell-2-3"></div>
+
+        <div class="grid-cell" id="grid-cell-3-0"></div>
+        <div class="grid-cell" id="grid-cell-3-1"></div>
+        <div class="grid-cell" id="grid-cell-3-2"></div>
+        <div class="grid-cell" id="grid-cell-3-3"></div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+{
+  "jshintConfig": {
+    "bitwise": true,
+    "curly": true,
+    "eqeqeq": true,
+    "esversion": 6,
+    "forin": true,
+    "freeze": true,
+    "funcscope": true,
+    "futurehostile": true,
+    "globals": "global",
+    "noarg": true,
+    "nonbsp": true,
+    "notypeof": true,
+    "shadow": false,
+    "strict": true,
+    "undef": true,
+    "varstmt": true,
+    "browser": true,
+    "devel": true,
+    "jquery": true
+  }
+}
