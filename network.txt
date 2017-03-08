@@ -1,4 +1,4 @@
-ÍøÂç×ÊÔ´
+ç½‘ç»œèµ„æº
 
 http://blog.csdn.net/fsdev/article/details/7294902
 http://blog.csdn.net/fsdev/article/details/7294849
@@ -7,38 +7,38 @@ http://baike.baidu.com/link?url=-Brjj-Ve_u4KXvTo9wo5IFyoyLhQGkYpsRzeUBk2sGXh7-Z4
 
 http://www.etc.edu.cn/articledigest38/zhongguo.htm
 
-ÃÉÌØ¿¨ÂåÊ÷ËÑË÷
+è’™ç‰¹å¡æ´›æ ‘æœç´¢
 
 http://ist.csu.edu.cn/ai/
 
 http://ist.csu.edu.cn/ai/ai.htm
 
-¼ÆËã»úÓ¦ÓÃ£ºhttp://www.joca.cn/CN/volumn/home.shtml
+è®¡ç®—æœºåº”ç”¨ï¼šhttp://www.joca.cn/CN/volumn/home.shtml
 
-¼ÆËã»úÏµÍ³Ó¦ÓÃ£ºhttp://www.c-s-a.org.cn/ch/reader/key_query.aspx
+è®¡ç®—æœºç³»ç»Ÿåº”ç”¨ï¼šhttp://www.c-s-a.org.cn/ch/reader/key_query.aspx
 
-Ğ¡ĞÍÎ¢ĞÍ¼ÆËã»úÏµÍ³£ºhttp://xwxt.sict.ac.cn/CN/volumn/current.shtml
+å°å‹å¾®å‹è®¡ç®—æœºç³»ç»Ÿï¼šhttp://xwxt.sict.ac.cn/CN/volumn/current.shtml
 
-ÖÇÄÜÏµÍ³Ñ§±¨£ºhttp://tis.hrbeu.edu.cn/
+æ™ºèƒ½ç³»ç»Ÿå­¦æŠ¥ï¼šhttp://tis.hrbeu.edu.cn/
 
 
 
-ÈË¹¤ÖÇÄÜ¾«Æ·¿Î³Ì£ºhttp://cai.csu.edu.cn/jpkc/rengongzhineng/index.htm
+äººå·¥æ™ºèƒ½ç²¾å“è¯¾ç¨‹ï¼šhttp://cai.csu.edu.cn/jpkc/rengongzhineng/index.htm
 
-AI Education Repository£ºhttp://www.cs.cofc.edu/~manaris/ai-education-repository/index.html
+AI Education Repositoryï¼šhttp://www.cs.cofc.edu/~manaris/ai-education-repository/index.html
 
-MITÈË¹¤ÖÇÄÜÊµÑéÊÒ£ºhttp://www.csail.mit.edu/index.php
+MITäººå·¥æ™ºèƒ½å®éªŒå®¤ï¼šhttp://www.csail.mit.edu/index.php
 
-ÈË¹¤ÖÇÄÜÑ§»á£ºhttp://www.caai.cn/
+äººå·¥æ™ºèƒ½å­¦ä¼šï¼šhttp://www.caai.cn/
 
-ÖĞ¹úÈË¹¤ÖÇÄÜÍø£ºhttp://www.chinaai.org/
+ä¸­å›½äººå·¥æ™ºèƒ½ç½‘ï¼šhttp://www.chinaai.org/
 
-ÈË¹¤ÖÇÄÜÑĞ¾¿Õß¾ãÀÖ²¿£ºhttp://www.souwu.com/bitfarmer/
+äººå·¥æ™ºèƒ½ç ”ç©¶è€…ä¿±ä¹éƒ¨ï¼šhttp://www.souwu.com/bitfarmer/
 
-±±ÓÊ£­Ä£Ê½Ê¶±ğÓëÖÇÄÜÏµÍ³£ºhttp://www.pris.edu.cn/
+åŒ—é‚®ï¼æ¨¡å¼è¯†åˆ«ä¸æ™ºèƒ½ç³»ç»Ÿï¼šhttp://www.pris.edu.cn/
 
-ÃÀ¹úÈË¹¤ÖÇÄÜÑ§»á£ºhttp://www.aaai.org/
+ç¾å›½äººå·¥æ™ºèƒ½å­¦ä¼šï¼šhttp://www.aaai.org/
 
-AI Programming Resources£ºhttp://www.cs.berkeley.edu/~russell/prog.html
+AI Programming Resourcesï¼šhttp://www.cs.berkeley.edu/~russell/prog.html
 
-Visual PrologÑ§Ï°ÍøÕ¾£ºwww.visual-prolog.com
+Visual Prologå­¦ä¹ ç½‘ç«™ï¼šwww.visual-prolog.com
