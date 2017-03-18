@@ -13,14 +13,14 @@ const ai = (()=> {
 		 * 初始化
 		 */
 		module.init = ()=> {
-			util.print("----------ai init----------");
+			util.log("----------ai init----------");
 		};
 
 		/**
 		 * 销毁
 		 */
 		module.destroy = ()=> {
-			util.print("----------ai destroy----------");
+			util.log("----------ai destroy----------");
 		};
 	}
 

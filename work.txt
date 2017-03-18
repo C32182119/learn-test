@@ -140,3 +140,10 @@ AlphaGo又以4∶1战胜世界围棋冠军李世石，在学术界产生了空�
 [8] 徐长明, 南晓斐, 王骄, 等. 中国象棋机器博弈的时间自适应分配策略研究[J]. 智能系统学报, 2006, (02): 39-43.
 [9] 王骄, 王涛, 罗艳红, 等. 中国象棋计算机博弈系统评估函数的自适应遗传算法实现[J]. 东北大学学报(自然科学版), 2005, 26(10): 949-952.
 [10] 马骁, 王轩, 王晓龙. 一类非完备信息博弈的信息模型[J]. 计算机研究与发展, 2010, 47(12): 2100-2109.
+
+
+Donald E. Knuth, Ronald W. Moore. An analysis of alpha-beta pruning[J]. Artificial Intelligence, 1975, 6(4):293-326.
+
+KJELDSEN T H. John von Neumann 's conception of the minimax theorem: a journey through different mathematical contexts [J]. Archive for History of Exact Sciences, 2001, 56 (1): 39 - 68.
+
+Brudno B A L. Bounds and Valuations for Shortening the Search of Estimates[J]. Problems of Cybernetics, 1963, 10: 225-241.

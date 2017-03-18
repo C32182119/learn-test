@@ -86,7 +86,7 @@ const animation = (()=> {
 						`<div class="number-cell" id="number-cell-${i}-${j}"></div>`);
 					let thisNumberCell = $(`#number-cell-${i}-${j}`);
 					//如果格子中没数字，则不显示
-					if (data[i][j].value === global.CELL_MIN) {
+					if (data[i][j].value === global.CELL_DEFAULT) {
 						thisNumberCell.css('width', '0');
 						thisNumberCell.css('height', '0');
 						thisNumberCell.css('top', local.getPosition("TOP", {x: i, y: j}) + 50);
@@ -114,7 +114,7 @@ const animation = (()=> {
 		 * 初始化
 		 */
 		module.init = ()=> {
-			util.print("----------animation init----------");
+			util.log("----------animation init----------");
 			local.initGrid();
 		};
 
@@ -122,7 +122,7 @@ const animation = (()=> {
 		 * 更新
 		 */
 		module.update = ()=> {
-			util.print("----------animation update----------");
+			util.log("----------animation update----------");
 			local.updateView();
 		};
 
@@ -130,7 +130,7 @@ const animation = (()=> {
 		 * 销毁
 		 */
 		module.destroy = ()=> {
-			util.print("----------animation destroy----------");
+			util.log("----------animation destroy----------");
 		};
 	}
 

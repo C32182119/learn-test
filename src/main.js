@@ -28,7 +28,7 @@ const main = (()=> {
 		 * 主程序入口
 		 */
 		module.start = ()=> {
-			util.print("----------main start----------");
+			util.log("----------main start----------");
 			local.init();
 
 			animation.update();
@@ -38,7 +38,7 @@ const main = (()=> {
 		 * 销毁
 		 */
 		module.destroy = ()=> {
-			util.print("----------main destroy----------");
+			util.log("----------main destroy----------");
 			ai.destroy();
 			animation.destroy();
 			game.destroy();

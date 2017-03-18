@@ -1,7 +1,7 @@
 /*--------------------全局参数--------------------*/
 const global = {//jshint ignore: line
 	"CELL_MAX": 2048,//允许出现的最大数字
-	"CELL_MIN": 0,//最小的数字，也是初始化的数字
+	"CELL_DEFAULT": 0,//初始化的数字
 	"GRID_SIZE": 4//网格的大小，4X4
 };
 /**
@@ -17,7 +17,7 @@ const util = (()=> {
 		/**
 		 * 打印信息
 		 */
-		module.print = function () {
+		module.log = function () {
 			let args = Array.prototype.slice.call(arguments);
 			args.forEach((value)=> {
 				console.log(value);
