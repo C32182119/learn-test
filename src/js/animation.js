@@ -17,7 +17,7 @@ const animation = (()=> {
 		 * @param y
 		 * @returns {number}
 		 */
-		local.getPosition = (pos, {x, y})=> {
+		local.getPosition = (pos, x, y)=> {
 			if (pos === 'TOP') {
 				return 20 + x * 120;
 			}
@@ -28,20 +28,20 @@ const animation = (()=> {
 
 		/**
 		 * 数字的颜色
-		 * @param number
+		 * @param value
 		 * @returns {string}
 		 */
-		local.getNumberColor = (number)=> {
-			return number <= 4 ? "#776e65" : "#ffffff";
+		local.getNumberColor = (value)=> {
+			return value <= 4 ? "#776e65" : "#ffffff";
 		};
 
 		/**
 		 * 不同数字所在格子的背景颜色
-		 * @param number
+		 * @param value
 		 * @returns {string}
 		 */
-		local.getNumberBgColor = (number)=> {
-			switch (number) {
+		local.getNumberBgColor = (value)=> {
+			switch (value) {
 				case 2: return "#eee4da";
 				case 4: return "#ede0c8";
 				case 8: return "#f2b179";
@@ -66,42 +66,8 @@ const animation = (()=> {
 			for (let i = 0; i < global.GRID_SIZE; i++) {
 				for (let j = 0; j < global.GRID_SIZE; j++) {
 					let gridCell = $(`#grid-cell-${i}-${j}`);
-					gridCell.css('top', local.getPosition("TOP", {x: i, y: j}));
-					gridCell.css('left', local.getPosition("LEFT", {x: i, y: j}));
-				}
-			}
-		};
-
-		/**
-		 * 更新前端样式
-		 */
-		local.updateView = ()=> {
-			//移除现有的样式
-			$(".number-cell").remove();
-
-			let data = game.getGameData();
-			for (let i = 0; i < global.GRID_SIZE; i++) {
-				for (let j = 0; j < global.GRID_SIZE; j++) {
-					$("#grid-container").append(
-						`<div class="number-cell" id="number-cell-${i}-${j}"></div>`);
-					let thisNumberCell = $(`#number-cell-${i}-${j}`);
-					//如果格子中没数字，则不显示
-					if (data[i][j].value === global.CELL_DEFAULT) {
-						thisNumberCell.css('width', '0');
-						thisNumberCell.css('height', '0');
-						thisNumberCell.css('top', local.getPosition("TOP", {x: i, y: j}) + 50);
-						thisNumberCell.css('left', local.getPosition("LEFT", {x: i, y: j}) + 50);
-					} else {
-						thisNumberCell.css('width', '100px');
-						thisNumberCell.css('height', '100px');
-						thisNumberCell.css('top', local.getPosition("TOP", {x: i, y: j}));
-						thisNumberCell.css('left', local.getPosition("LEFT", {x: i, y: j}));
-						thisNumberCell.css('background-color', local.getNumberBgColor(data[i][j].value));
-						thisNumberCell.css('color', local.getNumberColor(data[i][j].value));
-						thisNumberCell.text(data[i][j].value);
-					}
-					//还原
-					data[i][j].isMerged = false;
+					gridCell.css('top', local.getPosition("TOP", i, j));
+					gridCell.css('left', local.getPosition("LEFT", i, j));
 				}
 			}
 		};
@@ -111,6 +77,73 @@ const animation = (()=> {
 	/*--------------------模块相关--------------------*/
 	{
 		/**
+		 * 更新前端样式
+		 */
+		module.updateView = (data)=> {
+			//移除现有的样式
+			$(".number-cell").remove();
+
+			for (let i = 0; i < global.GRID_SIZE; i++) {
+				for (let j = 0; j < global.GRID_SIZE; j++) {
+					$("#grid-container").append(
+						`<div class="number-cell" id="number-cell-${i}-${j}"></div>`);
+					let thisNumberCell = $(`#number-cell-${i}-${j}`);
+					//如果格子中没数字，则不显示
+					if (data[i][j].value === global.CELL_DEFAULT) {
+						thisNumberCell.css('width', '0');
+						thisNumberCell.css('height', '0');
+						thisNumberCell.css('top', local.getPosition("TOP", i, j) + 50);
+						thisNumberCell.css('left', local.getPosition("LEFT", i, j) + 50);
+					} else {
+						thisNumberCell.css('width', '100px');
+						thisNumberCell.css('height', '100px');
+						thisNumberCell.css('top', local.getPosition("TOP", i, j));
+						thisNumberCell.css('left', local.getPosition("LEFT", i, j));
+						thisNumberCell.css('background-color', local.getNumberBgColor(data[i][j].value));
+						thisNumberCell.css('color', local.getNumberColor(data[i][j].value));
+						thisNumberCell.text(data[i][j].value);
+					}
+				}
+			}
+		};
+
+		/**
+		 * 播放生成数字的动画
+		 * @param x
+		 * @param y
+		 * @param value
+		 */
+		module.showCreateNumber = (x, y, value)=> {
+			let numberCell = $("#number-cell-" + x + "-" + y);
+			numberCell.css('background-color', local.getNumberBgColor(value));
+			numberCell.css('color', local.getNumberColor(value));
+			numberCell.text(value);
+
+			numberCell.animate({
+				width: "100px",
+				height: "100px",
+				top: local.getPosition("TOP", x, y),
+				left: local.getPosition("LEFT", x, y)
+			}, 50);
+		};
+
+		/**
+		 * 播放移动数字的动画
+		 * @param fromX
+		 * @param fromY
+		 * @param toX
+		 * @param toY
+		 */
+		module.showMoveTo = (fromX, fromY, toX, toY)=> {
+			let numberCell = $("#number-cell-" + fromX + "-" + fromY);
+
+			numberCell.animate({
+				top: local.getPosition("TOP", toX, toY),
+				left: local.getPosition("LEFT", toX, toY)
+			}, 200);
+		};
+
+		/**
 		 * 初始化
 		 */
 		module.init = ()=> {
@@ -118,20 +151,6 @@ const animation = (()=> {
 			local.initGrid();
 		};
 
-		/**
-		 * 更新
-		 */
-		module.update = ()=> {
-			util.log("----------animation update----------");
-			local.updateView();
-		};
-
-		/**
-		 * 销毁
-		 */
-		module.destroy = ()=> {
-			util.log("----------animation destroy----------");
-		};
 	}
 
 	return module;
