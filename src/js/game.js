@@ -237,7 +237,7 @@ const game = (()=> {
 										flag = true;
 									}
 									//移动并且合并
-									else if (module.isConnected(i, i, k, j, data) &&data[i][k].value === data[i][j].value && !data[i][k].isMerged) {
+									else if (module.isConnected(i, i, k, j, data) && data[i][k].value === data[i][j].value && !data[i][k].isMerged) {
 										data[i][k].value += data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
 										data[i][k].isMerged = true;
