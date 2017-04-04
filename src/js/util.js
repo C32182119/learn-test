@@ -34,6 +34,29 @@ const util = (()=> {
 		};
 
 		/**
+		 * clone一个二维数组
+		 * @param data
+		 * @returns {Array}
+		 */
+		module.cloneData = (data)=> {
+			let result = [];
+			data.forEach((array)=> {
+				let items = [];
+				array.forEach((item)=> {
+					let obj = {};
+					for (let key in item) {
+						if (item.hasOwnProperty(key)) {
+							obj[key] = item[key];
+						}
+					}
+					items.push(obj);
+				});
+				result.push(items);
+			});
+			return result;
+		};
+
+		/**
 		 * 打印信息
 		 */
 		module.log = function () {

@@ -45,17 +45,18 @@ const game = (()=> {
 		 * @returns {Array}
 		 */
 		module.cloneGameArray = ()=> {
-			let cloneArray = [];
-			for (let i = 0; i < global.GRID_SIZE; i++) {
-				cloneArray[i] = [];
-				for (let j = 0; j < global.GRID_SIZE; j++) {
-					cloneArray[i][j] = {
-						value: gameArray[i][j].value,
-						isMerged: gameArray[i][j].isMerged
-					};
-				}
-			}
-			return cloneArray;
+			// let cloneArray = [];
+			// for (let i = 0; i < global.GRID_SIZE; i++) {
+			// 	cloneArray[i] = [];
+			// 	for (let j = 0; j < global.GRID_SIZE; j++) {
+			// 		cloneArray[i][j] = {
+			// 			value: gameArray[i][j].value,
+			// 			isMerged: gameArray[i][j].isMerged
+			// 		};
+			// 	}
+			// }
+			// return cloneArray;
+			return util.cloneData(gameArray);
 		};
 
 		/**
