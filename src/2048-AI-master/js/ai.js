@@ -61,7 +61,8 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
                 }
             }
         }
-    } else { // computer's turn, we'll do heavy pruning to keep the branching factor low
+    }
+    else { // computer's turn, we'll do heavy pruning to keep the branching factor low
         bestScore = beta;
 
         // try a 2 and 4 in each cell and measure how annoying it is
