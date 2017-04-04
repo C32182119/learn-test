@@ -1,4 +1,4 @@
-/* globals util */
+/* globals util, animation */
 /**
  * 游戏逻辑模块
  */
@@ -122,7 +122,7 @@ const game = (()=> {
 						for (let j = global.GRID_SIZE - 2; j >= 0; j--) {
 							if (data[i][j].value !== global.CELL_DEFAULT) {
 								if (data[i][j + 1].value === global.CELL_DEFAULT ||
-									data[i + 1][j].value === data[i][j].value) {
+									data[i][j + 1].value === data[i][j].value) {
 									return true;
 								}
 							}
@@ -180,6 +180,15 @@ const game = (()=> {
 		};
 
 		/**
+		 * 判断游戏是否结束
+		 * @param data
+		 * @returns {boolean}
+		 */
+		module.isGameOver = (data = gameArray)=> {
+			return (!module.isEmpty(data) && !module.isMovable(global.ACTION_ALL, data));
+		};
+
+		/**
 		 * 随机生成一个数字
 		 * @param data
 		 * @returns {*}
@@ -215,15 +224,9 @@ const game = (()=> {
 		 * 移动局面
 		 * @param direction
 		 * @param data
-		 * @returns {*}
+		 * @param isShowAnimation
 		 */
-		module.moveTo = (direction, data = gameArray)=> {
-			let result = {}, results = [], flag = false;
-			//如果局面不能移动
-			if (!module.isMovable(direction, data)) {
-				if (module.isEmpty(data)) { return results; }
-				return false;
-			}
+		module.moveTo = (direction, data = gameArray, isShowAnimation = true)=> {
 			switch (direction) {
 				case global.ACTION_LEFT:
 					for (let i = 0; i < global.GRID_SIZE; i++) {
@@ -234,22 +237,19 @@ const game = (()=> {
 									if (module.isConnected(i, i, k, j, data) && data[i][k].value === global.CELL_DEFAULT) {
 										data[i][k].value = data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
-										flag = true;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, i, k);
+										}
+										break;
 									}
 									//移动并且合并
 									else if (module.isConnected(i, i, k, j, data) && data[i][k].value === data[i][j].value && !data[i][k].isMerged) {
 										data[i][k].value += data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
 										data[i][k].isMerged = true;
-										flag = true;
-									}
-									if (flag) {
-										result.fromX = i;
-										result.fromY = j;
-										result.toX = i;
-										result.toY = k;
-										results.push(result);
-										flag = false;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, i, k);
+										}
 										break;
 									}
 								}
@@ -266,22 +266,19 @@ const game = (()=> {
 									if (module.isConnected(k, i, j, j, data) && data[k][j].value === global.CELL_DEFAULT) {
 										data[k][j].value = data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
-										flag = true;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, k, j);
+										}
+										break;
 									}
 									//移动并且合并
 									else if (module.isConnected(k, i, j, j, data) && data[k][j].value === data[i][j].value && !data[k][j].isMerged) {
 										data[k][j].value += data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
 										data[k][j].isMerged = true;
-										flag = true;
-									}
-									if (flag) {
-										result.fromX = i;
-										result.fromY = j;
-										result.toX = i;
-										result.toY = k;
-										results.push(result);
-										flag = false;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, k, j);
+										}
 										break;
 									}
 								}
@@ -298,22 +295,19 @@ const game = (()=> {
 									if (module.isConnected(i, i, j, k, data) && data[i][k].value === global.CELL_DEFAULT) {
 										data[i][k].value = data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
-										flag = true;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, i, k);
+										}
+										break;
 									}
 									//移动并且合并
 									else if (module.isConnected(i, i, j, k, data) && data[i][k].value === data[i][j].value && !data[i][k].isMerged) {
 										data[i][k].value += data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
 										data[i][k].isMerged = true;
-										flag = true;
-									}
-									if (flag) {
-										result.fromX = i;
-										result.fromY = j;
-										result.toX = i;
-										result.toY = k;
-										results.push(result);
-										flag = false;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, i, k);
+										}
 										break;
 									}
 								}
@@ -330,22 +324,19 @@ const game = (()=> {
 									if (module.isConnected(i, k, j, j, data) && data[k][j].value === global.CELL_DEFAULT) {
 										data[k][j].value = data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
-										flag = true;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, k, j);
+										}
+										break;
 									}
 									//移动并且合并
 									else if (module.isConnected(i, k, j, j, data) && data[k][j].value === data[i][j].value && !data[k][j].isMerged) {
 										data[k][j].value += data[i][j].value;
 										data[i][j].value = global.CELL_DEFAULT;
 										data[k][j].isMerged = true;
-										flag = true;
-									}
-									if (flag) {
-										result.fromX = i;
-										result.fromY = j;
-										result.toX = i;
-										result.toY = k;
-										results.push(result);
-										flag = false;
+										if (isShowAnimation) {
+											animation.showMoveTo(i, j, k, j);
+										}
 										break;
 									}
 								}
@@ -354,7 +345,6 @@ const game = (()=> {
 					}
 					break;
 			}
-			return results;
 		};
 
 		/**

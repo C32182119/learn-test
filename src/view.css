@@ -11,7 +11,7 @@ header h1 {
     font-weight: bold
 }
 
-header #btn_newgame,
+header #start,
 #btn_autoplay {
     display: block;
     margin: 20px auto;
@@ -24,7 +24,7 @@ header #btn_newgame,
     text-decoration: none
 }
 
-header #btn_newgame:hover,
+header #start:hover,
 #btn_autoplay:hover {
     background-color: #9f8b77
 }

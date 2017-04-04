@@ -118,13 +118,20 @@ const animation = (()=> {
 			numberCell.css('background-color', local.getNumberBgColor(value));
 			numberCell.css('color', local.getNumberColor(value));
 			numberCell.text(value);
-
-			numberCell.animate({
-				width: "100px",
-				height: "100px",
-				top: local.getPosition("TOP", x, y),
-				left: local.getPosition("LEFT", x, y)
-			}, 50);
+			//window.requestAnimationFrame(()=> {
+				numberCell.animate({
+					width: "100px",
+					height: "100px",
+					top: local.getPosition("TOP", x, y),
+					left: local.getPosition("LEFT", x, y)
+				}, 100, "linear");
+			//});
+			//{
+			//	duration: 100,
+			//		easing: "linear",
+			//	queue: "createNumber",
+			//	complete: ()=> {}
+			//}
 		};
 
 		/**
@@ -136,11 +143,18 @@ const animation = (()=> {
 		 */
 		module.showMoveTo = (fromX, fromY, toX, toY)=> {
 			let numberCell = $("#number-cell-" + fromX + "-" + fromY);
-
+			let a = {
+				duration: 100,
+				easing: "linear",
+				queue: "moveTo",
+				complete: ()=> {}
+			};
 			numberCell.animate({
 				top: local.getPosition("TOP", toX, toY),
 				left: local.getPosition("LEFT", toX, toY)
-			}, 200);
+			}, 100, "linear", ()=> {
+				module.updateView(game.getGameArray());
+			});
 		};
 
 		/**
