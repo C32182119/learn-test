@@ -89,7 +89,7 @@ const animation = (()=> {
 						`<div class="number-cell" id="number-cell-${i}-${j}"></div>`);
 					let thisNumberCell = $(`#number-cell-${i}-${j}`);
 					//如果格子中没数字，则不显示
-					if (data[i][j].value === global.CELL_DEFAULT) {
+					if (data[i][j] === global.CELL_DEFAULT) {
 						thisNumberCell.css('width', '0');
 						thisNumberCell.css('height', '0');
 						thisNumberCell.css('top', local.getPosition("TOP", i, j) + 50);
@@ -99,9 +99,9 @@ const animation = (()=> {
 						thisNumberCell.css('height', '100px');
 						thisNumberCell.css('top', local.getPosition("TOP", i, j));
 						thisNumberCell.css('left', local.getPosition("LEFT", i, j));
-						thisNumberCell.css('background-color', local.getNumberBgColor(data[i][j].value));
-						thisNumberCell.css('color', local.getNumberColor(data[i][j].value));
-						thisNumberCell.text(data[i][j].value);
+						thisNumberCell.css('background-color', local.getNumberBgColor(data[i][j]));
+						thisNumberCell.css('color', local.getNumberColor(data[i][j]));
+						thisNumberCell.text(data[i][j]);
 					}
 				}
 			}
@@ -118,20 +118,12 @@ const animation = (()=> {
 			numberCell.css('background-color', local.getNumberBgColor(value));
 			numberCell.css('color', local.getNumberColor(value));
 			numberCell.text(value);
-			//window.requestAnimationFrame(()=> {
-				numberCell.animate({
-					width: "100px",
-					height: "100px",
-					top: local.getPosition("TOP", x, y),
-					left: local.getPosition("LEFT", x, y)
-				}, 100, "linear");
-			//});
-			//{
-			//	duration: 100,
-			//		easing: "linear",
-			//	queue: "createNumber",
-			//	complete: ()=> {}
-			//}
+			numberCell.animate({
+				width: "100px",
+				height: "100px",
+				top: local.getPosition("TOP", x, y),
+				left: local.getPosition("LEFT", x, y)
+			}, 100, "linear");
 		};
 
 		/**
@@ -143,12 +135,6 @@ const animation = (()=> {
 		 */
 		module.showMoveTo = (fromX, fromY, toX, toY)=> {
 			let numberCell = $("#number-cell-" + fromX + "-" + fromY);
-			let a = {
-				duration: 100,
-				easing: "linear",
-				queue: "moveTo",
-				complete: ()=> {}
-			};
 			numberCell.animate({
 				top: local.getPosition("TOP", toX, toY),
 				left: local.getPosition("LEFT", toX, toY)

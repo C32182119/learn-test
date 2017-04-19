@@ -11,8 +11,18 @@ const main = (()=> {
 	/*--------------------内部函数--------------------*/
 	{
 
-		local.runAI = (action)=> {
-
+		module.runAI = ()=> {
+			let isPlayTurn = true;
+			while (1) {
+				let move = ai.getBestMove(game.getGameArray(), isPlayTurn);
+				isPlayTurn = !isPlayTurn;
+				if (move !== -1) {
+					local.runPlayer(move);
+				}
+				else {
+					break;
+				}
+			}
 		};
 
 		local.runPlayer = (action)=> {
@@ -110,7 +120,11 @@ const main = (()=> {
 				}, 10);
 			}
 
-			local.listener();
+
+
+
+
+			// local.listener();
 
 		};
 

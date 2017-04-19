@@ -7,7 +7,8 @@ const game = (()=> {
 	/*--------------------初始化成员变量--------------------*/
 	let module = {},
 		local = {},
-		gameArray;//整个游戏的数据，是一个二维数组
+		gameArray = [],//整个游戏的数据，是一个二维数组
+		isMerged = [];
 
 	/*--------------------逻辑相关--------------------*/
 	{
@@ -16,14 +17,12 @@ const game = (()=> {
 		 * @param value
 		 */
 		local.initGameArray = (value = global.CELL_DEFAULT)=> {
-			gameArray = [];
 			for (let i = 0; i < global.GRID_SIZE; i++) {
 				gameArray[i] = [];
+				isMerged[i] = [];
 				for (let j = 0; j < global.GRID_SIZE; j++) {
-					gameArray[i][j] = {
-						value: value,
-						isMerged: false
-					};
+					gameArray[i][j] = value;
+					isMerged[i][j] = false;
 				}
 			}
 		};
@@ -45,28 +44,17 @@ const game = (()=> {
 		 * @returns {Array}
 		 */
 		module.cloneGameArray = ()=> {
-			// let cloneArray = [];
-			// for (let i = 0; i < global.GRID_SIZE; i++) {
-			// 	cloneArray[i] = [];
-			// 	for (let j = 0; j < global.GRID_SIZE; j++) {
-			// 		cloneArray[i][j] = {
-			// 			value: gameArray[i][j].value,
-			// 			isMerged: gameArray[i][j].isMerged
-			// 		};
-			// 	}
-			// }
-			// return cloneArray;
 			return util.cloneData(gameArray);
 		};
 
 		/**
 		 * 重置合并的状态
 		 */
-		module.resetGameArrayState = (data = gameArray)=> {
+		module.resetGameArrayState = ()=> {
 			for (let i = 0; i < global.GRID_SIZE; i++) {
 				for (let j = 0; j < global.GRID_SIZE; j++) {
-					if (data[i][j].isMerged) {
-						data[i][j].isMerged = false;
+					if (isMerged[i][j]) {
+						isMerged[i][j] = false;
 					}
 				}
 			}
@@ -80,7 +68,7 @@ const game = (()=> {
 		module.isEmpty = (data = gameArray)=> {
 			for (let i = 0; i < global.GRID_SIZE; i++) {
 				for (let j = 0; j < global.GRID_SIZE; j++) {
-					if (data[i][j].value === global.CELL_DEFAULT) { return true; }
+					if (data[i][j] === global.CELL_DEFAULT) { return true; }
 				}
 			}
 			return false;
@@ -97,9 +85,9 @@ const game = (()=> {
 				case global.ACTION_LEFT:
 					for (let i = 0; i < global.GRID_SIZE; i++) {
 						for (let j = 1; j < global.GRID_SIZE; j++) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
-								if (data[i][j - 1].value === global.CELL_DEFAULT ||
-									data[i][j - 1].value === data[i][j].value) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
+								if (data[i][j - 1] === global.CELL_DEFAULT ||
+									data[i][j - 1] === data[i][j]) {
 									return true;
 								}
 							}
@@ -109,9 +97,9 @@ const game = (()=> {
 				case global.ACTION_UP:
 					for (let j = 0; j < global.GRID_SIZE; j++) {
 						for (let i = 1; i < global.GRID_SIZE; i++) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
-								if (data[i - 1][j].value === global.CELL_DEFAULT ||
-									data[i - 1][j].value === data[i][j].value) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
+								if (data[i - 1][j] === global.CELL_DEFAULT ||
+									data[i - 1][j] === data[i][j]) {
 									return true;
 								}
 							}
@@ -121,9 +109,9 @@ const game = (()=> {
 				case global.ACTION_RIGHT:
 					for (let i = 0; i < global.GRID_SIZE; i++) {
 						for (let j = global.GRID_SIZE - 2; j >= 0; j--) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
-								if (data[i][j + 1].value === global.CELL_DEFAULT ||
-									data[i][j + 1].value === data[i][j].value) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
+								if (data[i][j + 1] === global.CELL_DEFAULT ||
+									data[i][j + 1] === data[i][j]) {
 									return true;
 								}
 							}
@@ -133,9 +121,9 @@ const game = (()=> {
 				case global.ACTION_DOWN:
 					for (let j = 0; j < global.GRID_SIZE; j++) {
 						for (let i = global.GRID_SIZE - 2; i >= 0; i--) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
-								if (data[i + 1][j].value === global.CELL_DEFAULT ||
-									data[i + 1][j].value === data[i][j].value) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
+								if (data[i + 1][j] === global.CELL_DEFAULT ||
+									data[i + 1][j] === data[i][j]) {
 									return true;
 								}
 							}
@@ -164,7 +152,7 @@ const game = (()=> {
 			//水平方向
 			if (row1 === row2) {
 				for (let i = col1 + 1; i < col2; i++) {
-					if (data[row1][i].value !== global.CELL_DEFAULT) {
+					if (data[row1][i] !== global.CELL_DEFAULT) {
 						return false;
 					}
 				}
@@ -172,7 +160,7 @@ const game = (()=> {
 			//垂直方向
 			if (col1 === col2) {
 				for (let i = row1 + 1; i < row2; i++) {
-					if (data[i][col1].value !== global.CELL_DEFAULT) {
+					if (data[i][col1] !== global.CELL_DEFAULT) {
 						return false;
 					}
 				}
@@ -201,7 +189,7 @@ const game = (()=> {
 			//随机一个位置
 			for (let i = 0; i < global.GRID_SIZE; i++) {
 				for (let j = 0; j < global.GRID_SIZE; j++) {
-					if (data[i][j].value === global.CELL_DEFAULT) {
+					if (data[i][j] === global.CELL_DEFAULT) {
 						emptyCell.push(i + "," + j);
 					}
 				}
@@ -212,7 +200,7 @@ const game = (()=> {
 			//随机一个数字
 			randValue = Math.random() < 0.9 ? 2 : 4;
 			//在随机位置显示随机数字
-			data[randX][randY].value = randValue;
+			data[randX][randY] = randValue;
 			return {
 				x: randX,
 				y: randY,
@@ -232,22 +220,22 @@ const game = (()=> {
 				case global.ACTION_LEFT:
 					for (let i = 0; i < global.GRID_SIZE; i++) {
 						for (let j = 1; j < global.GRID_SIZE; j++) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
 								for (let k = 0; k < j; k++) {
 									//直接移动
-									if (module.isConnected(i, i, k, j, data) && data[i][k].value === global.CELL_DEFAULT) {
-										data[i][k].value = data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
+									if (module.isConnected(i, i, k, j, data) && data[i][k] === global.CELL_DEFAULT) {
+										data[i][k] = data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, i, k);
 										}
 										break;
 									}
 									//移动并且合并
-									else if (module.isConnected(i, i, k, j, data) && data[i][k].value === data[i][j].value && !data[i][k].isMerged) {
-										data[i][k].value += data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
-										data[i][k].isMerged = true;
+									else if (module.isConnected(i, i, k, j, data) && data[i][k] === data[i][j] && !isMerged[i][k]) {
+										data[i][k] += data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
+										isMerged[i][k] = true;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, i, k);
 										}
@@ -261,22 +249,22 @@ const game = (()=> {
 				case global.ACTION_UP:
 					for (let j = 0; j < global.GRID_SIZE; j++) {
 						for (let i = 1; i < global.GRID_SIZE; i++) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
 								for (let k = 0; k < i; k++) {
 									//直接移动
-									if (module.isConnected(k, i, j, j, data) && data[k][j].value === global.CELL_DEFAULT) {
-										data[k][j].value = data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
+									if (module.isConnected(k, i, j, j, data) && data[k][j] === global.CELL_DEFAULT) {
+										data[k][j] = data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, k, j);
 										}
 										break;
 									}
 									//移动并且合并
-									else if (module.isConnected(k, i, j, j, data) && data[k][j].value === data[i][j].value && !data[k][j].isMerged) {
-										data[k][j].value += data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
-										data[k][j].isMerged = true;
+									else if (module.isConnected(k, i, j, j, data) && data[k][j] === data[i][j] && !isMerged[k][j]) {
+										data[k][j] += data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
+										isMerged[k][j] = true;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, k, j);
 										}
@@ -290,22 +278,22 @@ const game = (()=> {
 				case global.ACTION_RIGHT:
 					for (let i = 0; i < global.GRID_SIZE; i++) {
 						for (let j = global.GRID_SIZE - 2; j >= 0; j--) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
 								for (let k = global.GRID_SIZE - 1; k > j; k--) {
 									//直接移动
-									if (module.isConnected(i, i, j, k, data) && data[i][k].value === global.CELL_DEFAULT) {
-										data[i][k].value = data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
+									if (module.isConnected(i, i, j, k, data) && data[i][k] === global.CELL_DEFAULT) {
+										data[i][k] = data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, i, k);
 										}
 										break;
 									}
 									//移动并且合并
-									else if (module.isConnected(i, i, j, k, data) && data[i][k].value === data[i][j].value && !data[i][k].isMerged) {
-										data[i][k].value += data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
-										data[i][k].isMerged = true;
+									else if (module.isConnected(i, i, j, k, data) && data[i][k] === data[i][j] && !isMerged[i][k]) {
+										data[i][k] += data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
+										isMerged[i][k] = true;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, i, k);
 										}
@@ -319,22 +307,22 @@ const game = (()=> {
 				case global.ACTION_DOWN:
 					for (let j = 0; j < global.GRID_SIZE; j++) {
 						for (let i = global.GRID_SIZE - 2; i >= 0; i--) {
-							if (data[i][j].value !== global.CELL_DEFAULT) {
+							if (data[i][j] !== global.CELL_DEFAULT) {
 								for (let k = global.GRID_SIZE - 1; k > i; k--) {
 									//直接移动
-									if (module.isConnected(i, k, j, j, data) && data[k][j].value === global.CELL_DEFAULT) {
-										data[k][j].value = data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
+									if (module.isConnected(i, k, j, j, data) && data[k][j] === global.CELL_DEFAULT) {
+										data[k][j] = data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, k, j);
 										}
 										break;
 									}
 									//移动并且合并
-									else if (module.isConnected(i, k, j, j, data) && data[k][j].value === data[i][j].value && !data[k][j].isMerged) {
-										data[k][j].value += data[i][j].value;
-										data[i][j].value = global.CELL_DEFAULT;
-										data[k][j].isMerged = true;
+									else if (module.isConnected(i, k, j, j, data) && data[k][j] === data[i][j] && !isMerged[k][j]) {
+										data[k][j] += data[i][j];
+										data[i][j] = global.CELL_DEFAULT;
+										isMerged[k][j] = true;
 										if (isShowAnimation) {
 											animation.showMoveTo(i, j, k, j);
 										}

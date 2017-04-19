@@ -43,13 +43,7 @@ const util = (()=> {
 			data.forEach((array)=> {
 				let items = [];
 				array.forEach((item)=> {
-					let obj = {};
-					for (let key in item) {
-						if (item.hasOwnProperty(key)) {
-							obj[key] = item[key];
-						}
-					}
-					items.push(obj);
+					items.push(item);
 				});
 				result.push(items);
 			});
