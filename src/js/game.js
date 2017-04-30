@@ -334,6 +334,7 @@ const game = (()=> {
 					}
 					break;
 			}
+			module.resetGameArrayState();
 		};
 
 		/**

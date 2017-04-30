@@ -6,7 +6,8 @@ const main = (()=> {
     "use strict";
 	/*--------------------初始化成员变量--------------------*/
     let module = {},
-	    local = {};
+	    local = {},
+	    moveQueue = [];
 
 	/*--------------------内部函数--------------------*/
 	{
@@ -17,11 +18,17 @@ const main = (()=> {
 				let move = ai.getBestMove(game.getGameArray(), isPlayTurn);
 				isPlayTurn = !isPlayTurn;
 				if (move !== -1) {
-					local.runPlayer(move);
+					// local.runPlayer(move);
+					moveQueue.push(move);
 				}
 				else {
 					break;
 				}
+			}
+			if (moveQueue.length > 0) {
+				setTimeout(()=> {
+					local.runPlayer(moveQueue.shift());
+				}, 500);
 			}
 		};
 
@@ -124,7 +131,7 @@ const main = (()=> {
 
 
 
-			// local.listener();
+			local.listener();
 
 		};
 
