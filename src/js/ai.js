@@ -131,9 +131,10 @@ const ai = (()=> {
 		};
 
 		local.evaluation = (data)=> {
-			return local.monotonicity(data) +
-				local.maxValue(data) +
-				Math.log(local.emptyCell(data)) * 2.7;
+			return local.monotonicity(data);
+			// return local.monotonicity(data) +
+			// 	local.maxValue(data) +
+			// 	Math.log(local.emptyCell(data)) * 2.7;
 		};
 
 		local.miniMax = (node, depth, isPlayerTurn)=> {
@@ -144,9 +145,9 @@ const ai = (()=> {
 				dataMapping;
 
 			if (depth === MAX_DEPTH) {
-				let a = [global.ACTION_LEFT, global.ACTION_UP,
+				let randomMove = [global.ACTION_LEFT, global.ACTION_UP,
 					global.ACTION_RIGHT, global.ACTION_DOWN];
-				bestMove = a[Math.floor(Math.random() * a.length)];
+				// bestMove = randomMove[Math.floor(Math.random() * randomMove.length)];
 				return bestMove;
 			}
 			//玩家回合
@@ -179,15 +180,19 @@ const ai = (()=> {
 							children.value = alpha;
 						}
 					}
+
 					children.alpha = Math.max(children.alpha, alpha);
 					if (node.alpha < children.alpha) {
 						bestMove = direction;
 						node.alpha = children.alpha;
 					}
 					//是否剪枝
-					if (children.alpha < children.beta) {
-						local.miniMax(children, depth + 1, !isPlayerTurn);
-					}
+					// if (children.alpha < children.beta) {
+					// 	local.miniMax(children, depth + 1, !isPlayerTurn);
+					// }
+
+					//todo
+					local.miniMax(children, depth + 1, !isPlayerTurn);
 
 				}
 			}
@@ -227,12 +232,17 @@ const ai = (()=> {
 					searchTree.set(dataMapping, children);
 				}
 				node.children.push(children);
+
 				children.beta = Math.min(children.beta, beta);
 				node.beta = Math.min(node.beta, children.beta);
 				//是否剪枝
-				if (children.alpha < children.beta) {
-					local.miniMax(children, depth + 1, isPlayerTurn);
-				}
+				// if (children.alpha < children.beta) {
+				// 	local.miniMax(children, depth + 1, !isPlayerTurn);
+				// }
+
+				//todo
+				local.miniMax(children, depth + 1, !isPlayerTurn);
+
 			}
 
 			return bestMove;
