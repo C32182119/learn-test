@@ -11,8 +11,8 @@
     <header>
         <h1>2048</h1>
         <div class="button-group">
-            <a id="start" href="javascript:main.start()">Start</a>
-            <a id="auto-play" href="javascript:main.runAI()">AutoPlay</a>
+            <a id="start" href="javascript:main.start();">Start</a>
+            <a id="auto-play" href="javascript:main.auto();">AutoPlay</a>
         </div>
         <!--<a href="javascript:autoPlay();" id="btn_autoplay">Auto Play</a>-->
         <!--<p>score: <span id="score">0</span></p>-->
@@ -45,5 +45,12 @@
     <script src="js/game.js"></script>
     <script src="js/ai.js"></script>
     <script src="main.js"></script>
+
+    <script>
+        $(document).ready(()=> {
+            main.init();
+        });
+    </script>
+
 </body>
 </html>

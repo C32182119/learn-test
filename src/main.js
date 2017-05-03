@@ -7,27 +7,19 @@ const main = (()=> {
 	/*--------------------初始化成员变量--------------------*/
     let module = {},
 	    local = {},
-	    moveQueue = [];
+		isStop = true;
 
 	/*--------------------内部函数--------------------*/
 	{
 
-		module.runAI = ()=> {
-			let isPlayTurn = true;
-			while (1) {
-				let move = ai.getBestMove(game.getGameArray(), isPlayTurn);
-				isPlayTurn = !isPlayTurn;
-				if (move !== -1) {
-					// local.runPlayer(move);
-					moveQueue.push(move);
-				}
-				else {
-					break;
-				}
+		local.runAI = ()=> {
+			let move = ai.getBestMove(game.getGameArray());
+			if (move !== -1) {
+				local.runPlayer(move);
 			}
-			if (moveQueue.length > 0) {
+			if (!game.isGameOver() && !isStop) {
 				setTimeout(()=> {
-					local.runPlayer(moveQueue.shift());
+					local.runAI();
 				}, 500);
 			}
 		};
@@ -60,26 +52,22 @@ const main = (()=> {
 					//取消事件默认动作
 					switch (event.keyCode) {
 						//left & A
-						case 37:
-						case 65:
+						case 37: case 65:
 							event.preventDefault();
 							action = global.ACTION_LEFT;
 							break;
 						//up & W
-						case 38:
-						case 87:
+						case 38: case 87:
 							event.preventDefault();
 							action = global.ACTION_UP;
 							break;
 						//right & D
-						case 39:
-						case 68:
+						case 39: case 68:
 							event.preventDefault();
 							action = global.ACTION_RIGHT;
 							break;
 						//down & S
-						case 40:
-						case 83:
+						case 40: case 83:
 							event.preventDefault();
 							action = global.ACTION_DOWN;
 							break;
@@ -95,24 +83,18 @@ const main = (()=> {
 
     /*--------------------模块相关--------------------*/
 	{
-		/**
-		 * 初始化
-		 */
+
 		module.init = ()=> {
-			util.log("----------main init----------");
 			game.init();
 			animation.init();
 			ai.init();
 
-			$(document).ready(()=> {
-				animation.updateView(game.getGameArray());
-			});
+			animation.updateView(game.getGameArray());
 		};
-		/**
-		 * 主程序入口
-		 */
+
 		module.start = ()=> {
-			util.log("----------main start----------");
+			module.init();
+
 			let result1, result2;
 			result1 = game.createOneNumber();
 			if (!util.isEmptyObject(result1)) {
@@ -127,17 +109,17 @@ const main = (()=> {
 				}, 10);
 			}
 
-
-
-
-
 			local.listener();
+		};
 
+		module.auto = ()=> {
+			isStop = !isStop;
+			if (!isStop) {
+				local.runAI();
+			}
 		};
 
 	}
 
     return module;
 })();
-
-main.init();

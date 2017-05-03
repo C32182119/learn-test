@@ -341,7 +341,6 @@ const game = (()=> {
 		 * 初始化
 		 */
 		module.init = ()=> {
-			util.log("----------game init----------");
 			local.initGameArray();
 		};
 

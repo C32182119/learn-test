@@ -147,7 +147,6 @@ const animation = (()=> {
 		 * 初始化
 		 */
 		module.init = ()=> {
-			util.log("----------animation init----------");
 			local.initGrid();
 		};
 
