@@ -63,18 +63,17 @@ const ai = (()=> {
 		};
 
 		// counts the number of isolated groups.
-		local.islands = function() {
-			var self = this;
+		local.islands = function(data) {
+			var marked = [];
 			var mark = function(x, y, value) {
 				if (x >= 0 && x <= 3 && y >= 0 && y <= 3 &&
-					self.cells[x][y] &&
-					self.cells[x][y].value == value &&
-					!self.cells[x][y].marked ) {
-					self.cells[x][y].marked = true;
+					data[x][y] !== global.CELL_DEFAULT &&
+					data[x][y] === value &&
+					marked[x][y] === false ) {
+						marked[x][y] = true;
 
-					for (direction in [0,1,2,3]) {
-						var vector = self.getVector(direction);
-						mark(x + vector.x, y + vector.y, value);
+					for (var direction of [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }]) {
+						mark(x + direction.x, y + direction.y, value);
 					}
 				}
 			}
@@ -82,18 +81,19 @@ const ai = (()=> {
 			var islands = 0;
 
 			for (var x=0; x<4; x++) {
+				marked[x] = [];
 				for (var y=0; y<4; y++) {
-					if (this.cells[x][y]) {
-						this.cells[x][y].marked = false
+					if (data[x][y] !== global.CELL_DEFAULT) {
+						marked[x][y] = false;
 					}
 				}
 			}
 			for (var x=0; x<4; x++) {
 				for (var y=0; y<4; y++) {
-					if (this.cells[x][y] &&
-						!this.cells[x][y].marked) {
+					if (data[x][y] !== global.CELL_DEFAULT &&
+						marked[x][y] !== false) {
 						islands++;
-						mark(x, y , this.cells[x][y].value);
+						mark(x, y, data[x][y]);
 					}
 				}
 			}
@@ -205,44 +205,46 @@ const ai = (()=> {
 					Math.log(local.emptyCell(data)) * 2.7;
 			}
 			else {
-				return -local.smoothness(data);
+				return -local.smoothness(data) + local.islands(data);
 			}
 		};
 
 		local.miniMaxXX = (data, alpha, beta, depth, isPlayerTurn)=> {
-			let bestScore, bestMove = -1, result,
+			let move = -1, score, result,
 				copyData,
 				dataMapping;
 
 			//玩家回合(max)
 			if (isPlayerTurn) {
-				bestScore = alpha;
+				score = alpha;
 				for (let direction of [global.ACTION_LEFT, global.ACTION_UP, global.ACTION_RIGHT, global.ACTION_DOWN]) {
 					copyData = util.cloneData(data);
-					game.moveTo(direction, copyData, false);
-					game.resetGameArrayState();
-					dataMapping = local.dataMapping(copyData);
-					if (!game.isGameOver(copyData)) {
-						if (depth === 0) {
-							result = { move: bestMove, score: local.evaluation(copyData, isPlayerTurn) };
-						}
-						else {
-							result = local.miniMaxXX(copyData, bestScore, beta, depth - 1, !isPlayerTurn);
-						}
-						if (bestScore < result.score) {
-							bestMove = direction;
-							bestScore = result.score;
-						}
-						if (bestScore > beta) {
-							return { move: bestMove, score: beta };
-						}
+					if (game.isMovable(direction, copyData)) {
+						game.moveTo(direction, copyData, false);
+						game.resetGameArrayState();
+						dataMapping = local.dataMapping(copyData);
+						if (!game.isGameOver(copyData)) {
+							if (depth === 0) {
+								result = {move: move, score: local.evaluation(copyData, isPlayerTurn)};
+							}
+							else {
+								result = local.miniMaxXX(copyData, score, beta, depth - 1, !isPlayerTurn);
+							}
+							if (score < result.score) {
+								move = direction;
+								score = result.score;
+							}
+							if (score > beta) {
+								return {move: move, score: beta};
+							}
 
+						}
 					}
 				}
 			}
 			//电脑回合(min)
 			else {
-				bestScore = beta;
+				score = beta;
 				let empty = [], res = [], scores = { 2: [], 4: [] }, maxScore;
 				//找出所有空的
 				for (let i = 0; i < data.length; i++) {
@@ -274,12 +276,12 @@ const ai = (()=> {
 					copyData[item.pos.i][item.pos.j] = item.value;
 					dataMapping = local.dataMapping(copyData);
 
-					result = local.miniMaxXX(copyData, alpha, bestScore, depth, !isPlayerTurn);
+					result = local.miniMaxXX(copyData, alpha, score, depth, !isPlayerTurn);
 
-					if (bestScore > result.score) {
-						bestScore = result.score;
+					if (score > result.score) {
+						score = result.score;
 					}
-					if (bestScore < alpha) {
+					if (score < alpha) {
 						return { move: undefined, score: alpha };
 					}
 
@@ -287,7 +289,7 @@ const ai = (()=> {
 
 			}
 
-			return { move: bestMove, score: bestScore };
+			return { move: move, score: score };
 		};
 
 		local.miniMax = (node, depth, isPlayerTurn)=> {
@@ -397,7 +399,7 @@ const ai = (()=> {
 		};
 
 		local.iterativeDepth = (data)=> {
-			let start = (new Date()).getTime(), depth = 0, bestMove;
+			let start = (new Date()).getTime(), depth = 1, bestMove;
 			do {
 				let newBest = local.miniMaxXX(data, -Infinity, Infinity, depth, true).move;
 				if (newBest === -1) {
@@ -407,7 +409,7 @@ const ai = (()=> {
 					bestMove = newBest;
 				}
 				depth++;
-			} while ((new Date()).getTime() - start < 1000);
+			} while ((new Date()).getTime() - start < global.AI_MAX_TIME);
 
 			return bestMove;
 		};
@@ -429,7 +431,8 @@ const ai = (()=> {
 			}
 			currentNode = node;
 			//todo
-			return local.miniMaxXX(data, -Infinity, Infinity, 4, true).move;
+			//return local.miniMaxXX(data, -Infinity, Infinity, 1, true).move;
+			return local.iterativeDepth(data);
 		};
 
 		/**

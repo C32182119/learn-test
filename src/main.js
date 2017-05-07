@@ -20,20 +20,22 @@ const main = (()=> {
 			if (!game.isGameOver() && !isStop) {
 				setTimeout(()=> {
 					local.runAI();
-				}, 500);
+				}, 250);
 			}
 		};
 
 		local.runPlayer = (action)=> {
 			let result;
 			if (!game.isGameOver()) {
-				game.moveTo(action);
-				result = game.createOneNumber();
-				if (!util.isEmptyObject(result)) {
-					setTimeout(()=> {
-						animation.showCreateNumber(result.x, result.y, result.value);
-					}, 200);
-					game.resetGameArrayState();
+				if (game.isMovable(action)) {
+					game.moveTo(action);
+					result = game.createOneNumber();
+					if (!util.isEmptyObject(result)) {
+						setTimeout(()=> {
+							animation.showCreateNumber(result.x, result.y, result.value);
+						}, 200);
+						game.resetGameArrayState();
+					}
 				}
 			}
 			else {

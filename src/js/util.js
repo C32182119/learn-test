@@ -7,7 +7,8 @@ const global = {//jshint ignore: line
 	"ACTION_UP": 2,//上
 	"ACTION_RIGHT": 3,//右
 	"ACTION_DOWN": 4,//下
-	"ACTION_ALL": 5//任意方向
+	"ACTION_ALL": 5,//任意方向
+	"AI_MAX_TIME": 100//ai思考时间(单位: ms)
 };
 /**
  * 全局模块
