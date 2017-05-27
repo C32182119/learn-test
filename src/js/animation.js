@@ -63,8 +63,8 @@ const animation = (()=> {
 		 * 初始化格子的位置
 		 */
 		local.initGrid = ()=> {
-			for (let i = 0; i < global.GRID_SIZE; i++) {
-				for (let j = 0; j < global.GRID_SIZE; j++) {
+			for (let i = 0; i < global.GAME_GRID_SIZE; i++) {
+				for (let j = 0; j < global.GAME_GRID_SIZE; j++) {
 					let gridCell = $(`#grid-cell-${i}-${j}`);
 					gridCell.css('top', local.getPosition("TOP", i, j));
 					gridCell.css('left', local.getPosition("LEFT", i, j));
@@ -83,13 +83,13 @@ const animation = (()=> {
 			//移除现有的样式
 			$(".number-cell").remove();
 
-			for (let i = 0; i < global.GRID_SIZE; i++) {
-				for (let j = 0; j < global.GRID_SIZE; j++) {
+			for (let i = 0; i < global.GAME_GRID_SIZE; i++) {
+				for (let j = 0; j < global.GAME_GRID_SIZE; j++) {
 					$("#grid-container").append(
 						`<div class="number-cell" id="number-cell-${i}-${j}"></div>`);
 					let thisNumberCell = $(`#number-cell-${i}-${j}`);
 					//如果格子中没数字，则不显示
-					if (data[i][j] === global.CELL_DEFAULT) {
+					if (data[i][j] === global.GAME_CELL_DEFAULT) {
 						thisNumberCell.css('width', '0');
 						thisNumberCell.css('height', '0');
 						thisNumberCell.css('top', local.getPosition("TOP", i, j) + 50);

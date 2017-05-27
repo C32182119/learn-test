@@ -5,27 +5,11 @@
 const ai = (()=> {
 	"use strict";
 	/*--------------------初始化成员变量--------------------*/
-	let local = {},
-		module = {},
-		searchTree = new Map(),
-		dataCache = new Map(),
-		currentNode,
-		currentDepth = 0,
-		MAX_DEPTH = 6;
+	let local = {}, module = {},
+		TT;//置换表
+	let	cutOff = 0, cacheTimes = 0;
 
 	{
-
-		local.createNode = (mapping, parent)=> {
-			parent = (parent === undefined ? null : parent);
-			return {
-				mapping: mapping,//局面的映射
-				value: undefined,//局面的价值
-				parent: parent,//父节点
-				children: [],//子节点
-				alpha: (parent === null ? -Infinity : parent.alpha),
-				beta: (parent === null ? Infinity : parent.beta)
-			};
-		};
 
 		local.dataMapping = (data)=> {
 			return data.join(" ");
@@ -42,86 +26,48 @@ const ai = (()=> {
 			return result;
 		};
 
-		local.emptyCell = (data)=> {
-			let count = 0;
-			data.forEach((array)=> {
-				array.forEach((item)=> {
-					if (item === global.CELL_DEFAULT) {
-						count++;
-					}
-				});
-			});
-			return count;
-		};
-
-		local.maxValue = (data)=> {
-			let max = -Infinity;
-			data.forEach((array)=> {
-				max = Math.max(max, ...array);
-			});
-			return Math.log(max) / Math.LN2;
-		};
-
-		// counts the number of isolated groups.
-		local.islands = function(data) {
-			var marked = [];
-			var mark = function(x, y, value) {
-				if (x >= 0 && x <= 3 && y >= 0 && y <= 3 &&
-					data[x][y] !== global.CELL_DEFAULT &&
-					data[x][y] === value &&
-					marked[x][y] === false ) {
-						marked[x][y] = true;
-
-					for (var direction of [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }]) {
-						mark(x + direction.x, y + direction.y, value);
-					}
-				}
-			}
-
-			var islands = 0;
-
-			for (var x=0; x<4; x++) {
-				marked[x] = [];
-				for (var y=0; y<4; y++) {
-					if (data[x][y] !== global.CELL_DEFAULT) {
-						marked[x][y] = false;
-					}
-				}
-			}
-			for (var x=0; x<4; x++) {
-				for (var y=0; y<4; y++) {
-					if (data[x][y] !== global.CELL_DEFAULT &&
-						marked[x][y] !== false) {
-						islands++;
-						mark(x, y, data[x][y]);
-					}
-				}
-			}
-
-			return islands;
-		};
-
-		local.smoothness = (data)=> {
-			let smoothness = 0;
-			for (var x=0; x<4; x++) {
-				for (var y=0; y<4; y++) {
-					if (data[x][y] !== global.CELL_DEFAULT) {
-						let value = Math.log(data[x][y]) / Math.LN2;
-						for (let direction of [global.ACTION_RIGHT, global.ACTION_DOWN]) {
-							if (direction === global.ACTION_RIGHT) {
-								for (let k = y + 1; k < 4; k++) {
-									if (data[x][k] !== global.CELL_DEFAULT) {
-										let targetValue = Math.log(data[x][k]) / Math.LN2;
-										smoothness -= Math.abs(value - targetValue);
+		local.evaluation = (data, isPlayTurn)=> {
+			let result = 0, totals = [0, 0, 0, 0],
+				evaluation = { empty: 0, max: 0, smooth: 0, monotonicity: 0,  isolation: 0 },
+				weights = (function (isPlayTurn) {
+					let empty        = isPlayTurn ? 2.7 : 1.0,
+						max          = isPlayTurn ? 1.0 : 1.0,
+						smooth       = isPlayTurn ? -0.1 : 1.0,
+						monotonicity = isPlayTurn ? -1.0 : 1.0,
+						isolation    = isPlayTurn ? 0 : 1.0;
+					return { empty: empty, max: max, smooth: smooth, monotonicity: monotonicity, isolation: isolation };
+				})(isPlayTurn);
+			for (let i = 0; i < global.GAME_GRID_SIZE; i++) {
+				// if (isPlayTurn) {
+					//最大值
+					evaluation.max = Math.max(evaluation.max, ...data[i]);
+				// }
+				for (let j = 0; j < global.GAME_GRID_SIZE; j++) {
+					// if (isPlayTurn) {
+						//空格数
+						if (data[i][j] === global.GAME_CELL_DEFAULT) {
+							evaluation.empty++;
+						}
+					// }
+					//平滑性
+					let value, targetValue;
+					if (data[i][j] !== global.GAME_CELL_DEFAULT) {
+						value = Math.log(data[i][j]) / Math.LN2;
+						for (let direction of [global.GAME_ACTION_RIGHT, global.GAME_ACTION_DOWN]) {
+							if (direction === global.GAME_ACTION_RIGHT) {
+								for (let k = j + 1; k < global.GAME_GRID_SIZE; k++) {
+									if (data[i][k] !== global.GAME_CELL_DEFAULT) {
+										targetValue = Math.log(data[i][k]) / Math.LN2;
+										evaluation.smooth += Math.abs(value - targetValue);
 										break;
 									}
 								}
 							}
-							else if (direction === global.ACTION_DOWN) {
-								for (let k = x + 1; k < 4; k++) {
-									if (data[k][y] !== global.CELL_DEFAULT) {
-										let targetValue = Math.log(data[k][y]) / Math.LN2;
-										smoothness -= Math.abs(value - targetValue);
+							else if (direction === global.GAME_ACTION_DOWN) {
+								for (let k = i + 1; k < global.GAME_GRID_SIZE; k++) {
+									if (data[k][j] !== global.GAME_CELL_DEFAULT) {
+										targetValue = Math.log(data[k][j]) / Math.LN2;
+										evaluation.smooth += Math.abs(value - targetValue);
 										break;
 									}
 								}
@@ -129,118 +75,231 @@ const ai = (()=> {
 						}
 					}
 				}
-			}
-			return smoothness;
-		};
-
-		local.monotonicity = (data)=> {
-			let current, next, currentValue, nextValue,
-				totals = [0, 0, 0, 0];
-
-			for (let i = 0; i < global.GRID_SIZE; i++) {
-				current = 0;
-				next = current + 1;
-				while (next < global.GRID_SIZE) {
-					while (next < global.GRID_SIZE &&
-					data[i][next] === global.CELL_DEFAULT) {
+				// if (isPlayTurn) {
+					//单调性
+					let current = 0, next = 1, currentValue, nextValue;
+					//左右方向
+					while (next < global.GAME_GRID_SIZE) {
+						while (next < global.GAME_GRID_SIZE && data[i][next] === global.GAME_CELL_DEFAULT) {
+							next++;
+						}
+						if (next >= global.GAME_GRID_SIZE) {
+							next--;
+						}
+						currentValue = data[i][current] !== global.GAME_CELL_DEFAULT ?
+							Math.log(data[i][current]) / Math.LN2 : 0;
+						nextValue = data[i][next] !== global.GAME_CELL_DEFAULT ?
+							Math.log(data[i][next]) / Math.LN2 : 0;
+						if (currentValue > nextValue) {
+							totals[0] += currentValue - nextValue;
+						}
+						else if (nextValue > currentValue) {
+							totals[1] += nextValue - currentValue;
+						}
+						current = next;
 						next++;
 					}
-					if (next >= global.GRID_SIZE) {
-						next--;
-					}
-					currentValue = data[i][current] !== global.CELL_DEFAULT ?
-						Math.log(data[i][current]) / Math.LN2 : 0;
-					nextValue = data[i][next] !== global.CELL_DEFAULT ?
-						Math.log(data[i][next]) / Math.LN2 : 0;
-					if (currentValue > nextValue) {
-						totals[0] += nextValue - currentValue;
-						//totals[0] += currentValue - nextValue;
-					}
-					else if (nextValue > currentValue) {
-						totals[1] += currentValue - nextValue;
-						//totals[1] += nextValue - currentValue;
-					}
-					current = next;
-					next++;
-				}
-			}
-
-			for (let j = 0; j < global.GRID_SIZE; j++) {
-				current = 0;
-				next = current + 1;
-				while (next < global.GRID_SIZE) {
-					while ( next < global.GRID_SIZE &&
-					data[next][j] === global.CELL_DEFAULT) {
+					//上下方向
+					current = 0;
+					next = 1;
+					while (next < global.GAME_GRID_SIZE) {
+						while (next < global.GAME_GRID_SIZE && data[next][i] === global.GAME_CELL_DEFAULT) {
+							next++;
+						}
+						if (next >= global.GAME_GRID_SIZE) {
+							next--;
+						}
+						currentValue = data[current][i] !== global.GAME_CELL_DEFAULT ?
+							Math.log(data[current][i]) / Math.LN2 : 0;
+						nextValue = data[next][i] !== global.GAME_CELL_DEFAULT ?
+							Math.log(data[next][i]) / Math.LN2 : 0;
+						if (currentValue > nextValue) {
+							totals[2] += currentValue - nextValue;
+						}
+						else if (nextValue > currentValue) {
+							totals[3] += nextValue - currentValue;
+						}
+						current = next;
 						next++;
 					}
-					if (next >= global.GRID_SIZE) {
-						next--;
-					}
-					currentValue = data[current][j] !== global.CELL_DEFAULT ?
-						Math.log(data[current][j]) / Math.LN2 : 0;
-					nextValue = data[next][j] !== global.CELL_DEFAULT ?
-						Math.log(data[next][j]) / Math.LN2 : 0;
-					if (currentValue > nextValue) {
-						totals[2] += nextValue - currentValue;
-						//totals[2] += currentValue - nextValue;
-					}
-					else if (nextValue > currentValue) {
-						totals[3] += currentValue - nextValue;
-						//totals[3] += nextValue - currentValue;
-					}
-					current = next;
-					next++;
+				// }
+			}
+			// if (!isPlayTurn) {
+			// 	let marked = [],
+			// 		mark = (x, y, value)=> {
+			// 			if (x >= 0 && x <= 3 && y >= 0 && y <= 3 &&
+			// 				data[x][y] !== global.GAME_CELL_DEFAULT &&
+			// 				data[x][y] === value && !marked[x][y]) {
+			// 				marked[x][y] = true;
+			// 				for (let direction of [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }]) {
+			// 					mark(x + direction.x, y + direction.y, value);
+			// 				}
+			// 			}
+			// 		};
+			// 	for (let x = 0; x < 4; x++) {
+			// 		marked[x] = [];
+			// 		for (let y = 0; y < 4; y++) {
+			// 			if (data[x][y] !== global.GAME_CELL_DEFAULT) {
+			// 				marked[x][y] = false;
+			// 			}
+			// 		}
+			// 	}
+			// 	for (let x = 0; x < 4; x++) {
+			// 		for (let y = 0; y < 4; y++) {
+			// 			if (data[x][y] !== global.GAME_CELL_DEFAULT && !marked[x][y]) {
+			// 				evaluation.isolation++;
+			// 				mark(x, y, data[x][y]);
+			// 			}
+			// 		}
+			// 	}
+			// }
+
+			// if (evaluation.empty > 7) {
+			// 	evaluation.empty = Math.log(evaluation.empty);
+			// }
+			// else {
+			// 	evaluation.empty *= 10;
+			// }
+			// if (isPlayTurn) {
+				evaluation.empty = Math.log(evaluation.empty);
+				evaluation.max = Math.log(evaluation.max) / Math.LN2;
+				evaluation.monotonicity = Math.min(totals[0], totals[1]) + Math.min(totals[2], totals[3]);
+			// }
+			for (let key in evaluation) {
+				result += evaluation[key] * weights[key];
+			}
+			return result;
+		};
+
+		local.translationTable = ()=> {
+			let loc = {}, mod = {},
+				t = new Map();
+			mod.t = t;
+
+			loc.get = (key)=> {
+				return t.get(key);
+			};
+
+			loc.set = (key, value)=> {
+				t.set(key, value);
+			};
+
+			mod.has = (key) => {
+				return t.has(key);
+			};
+
+			mod.getValue = (key)=> {
+				if (!mod.has(key)) {
+					return;
 				}
-			}
+				let data = loc.get(key);
+				return data;
+			};
 
-			return Math.max(totals[0], totals[1]) + Math.max(totals[2], totals[3]);
+			mod.replace = (key, value, depth)=> {
+				if (!mod.has(key)) {
+					loc.set(key, value);
+					return;
+				}
+				let data = loc.get(key);
+				if (data.depth > depth) {
+					return;
+				}
+				// if (data.depth === depth) {
+				// 	if (data.type === "EXACT" && data.value > value.value) {
+				// 		return;
+				// 	}
+				// 	if (data.type === "LOW" && data.value < value.value) {
+				// 		return;
+				// 	}
+				// 	if (data.type === "HIGH" && data.value > value.value) {
+				// 		return;
+				// 	}
+				// }
+				loc.set(key, value);
+			};
+
+			return mod;
 		};
 
-		local.evaluation = (data, isPlayerTurn)=> {
-			if (isPlayerTurn) {
-				//return local.monotonicity(data);
-				return local.smoothness(data) * 0.1 +
-				local.monotonicity(data) +
-					local.maxValue(data) +
-					Math.log(local.emptyCell(data)) * 2.7;
-			}
-			else {
-				return -local.smoothness(data) + local.islands(data);
-			}
-		};
-
-		local.miniMaxXX = (data, alpha, beta, depth, isPlayerTurn)=> {
-			let move = -1, score, result,
-				copyData,
-				dataMapping;
+		local.miniMax = (data, alpha, beta, depth, isPlayerTurn)=> {
+			let move = -1, score, result, copyData, dataMapping, ttVal,
+				thisMap = local.dataMapping(data);
 
 			//玩家回合(max)
 			if (isPlayerTurn) {
 				score = alpha;
-				for (let direction of [global.ACTION_LEFT, global.ACTION_UP, global.ACTION_RIGHT, global.ACTION_DOWN]) {
-					copyData = util.cloneData(data);
-					if (game.isMovable(direction, copyData)) {
-						game.moveTo(direction, copyData, false);
-						game.resetGameArrayState();
-						dataMapping = local.dataMapping(copyData);
-						if (!game.isGameOver(copyData)) {
-							if (depth === 0) {
-								result = {move: move, score: local.evaluation(copyData, isPlayerTurn)};
-							}
-							else {
-								result = local.miniMaxXX(copyData, score, beta, depth - 1, !isPlayerTurn);
-							}
-							if (score < result.score) {
-								move = direction;
-								score = result.score;
-							}
-							if (score > beta) {
-								return {move: move, score: beta};
-							}
-
+				let nodeType = "LOW", candidates = [],
+					moveDirection = [ global.GAME_ACTION_LEFT, global.GAME_ACTION_UP,
+						global.GAME_ACTION_RIGHT, global.GAME_ACTION_DOWN ];
+				if (TT.has(thisMap)) {
+					ttVal = TT.getValue(thisMap);
+					if (ttVal.depth > depth) {
+						cacheTimes++;
+						if (ttVal.type === "EXACT") {
+							return { move: ttVal.move, score: ttVal.value };
+						}
+						if (ttVal.type === "LOW" && ttVal.value < alpha) {
+							// return { move: ttVal.move, score: alpha };
+						}
+						if (ttVal.type === "HIGH" && ttVal.value > beta) {
+							return { move: ttVal.move, score: beta };
 						}
 					}
 				}
+				if (ttVal !== undefined && ttVal.move !== -1) {
+					candidates.push(ttVal.move);
+					moveDirection = moveDirection.filter((item)=> {
+						return item !== ttVal.move;
+					});
+				}
+				for (let direction of moveDirection) {
+					if (game.isMovable(direction, data)) {
+						candidates.push(direction);
+					}
+				}
+				for (let direction of candidates) {
+					copyData = util.cloneData(data);
+					game.moveTo(direction, copyData, false);
+					dataMapping = local.dataMapping(copyData);
+					if (!game.isGameOver(copyData)) {
+						// if (game.getMaxNumber(copyData) >= global.GAME_CELL_MAX) {
+						// 	global.GAME_CELL_MAX *= 2;
+						// 	return { move: move, score: 10000 };
+						// }
+						if (depth === 0) {
+							result = { move: move, score: local.evaluation(copyData, isPlayerTurn) };
+							TT.replace(thisMap, { depth: depth, value: result.score, type: "EXACT", move: move }, depth);
+						}
+						else {
+							result = local.miniMax(copyData, score, beta, depth - 1, !isPlayerTurn);
+						}
+
+						// if (result.score > beta) {
+						// 	cutOff++;
+						// 	TT.replace(thisMap, { depth: depth, value: beta, type: "HIGH", move: -1 }, depth);
+						// 	return { move: -1, score: beta };
+						// }
+						// if (result.score > alpha) {
+						// 	move = direction;
+						// 	alpha = result.score;
+						// 	nodeType = "EXACT";
+						// }
+
+						if (score < result.score) {
+							move = direction;
+							score = result.score;
+							nodeType = "EXACT";
+						}
+						if (score > beta) {
+							cutOff++;
+							TT.replace(thisMap, { depth: depth, value: beta, type: "HIGH", move: move }, depth);
+							return { move: move, score: beta };
+						}
+
+					}
+				}
+				TT.replace(thisMap, { depth: depth, value: score, type: nodeType, move: move }, depth);
 			}
 			//电脑回合(min)
 			else {
@@ -249,17 +308,17 @@ const ai = (()=> {
 				//找出所有空的
 				for (let i = 0; i < data.length; i++) {
 					for (let j = 0; j < data[i].length; j++) {
-						if (data[i][j] === global.CELL_DEFAULT) {
-							empty.push({i: i, j: j});
+						if (data[i][j] === global.GAME_CELL_DEFAULT) {
+							empty.push({ x: i, y: j });
 						}
 					}
 				}
 				//每一个空的都尝试2或4
 				empty.forEach((item, index)=> {
 					for (let key in scores) {
-						data[item.i][item.j] = key;
+						data[item.x][item.y] = key;
 						scores[key][index] = local.evaluation(data, isPlayerTurn);
-						data[item.i][item.j] = global.CELL_DEFAULT;
+						data[item.x][item.y] = global.GAME_CELL_DEFAULT;
 					}
 				});
 				maxScore = Math.max(Math.max(...scores[2]), Math.max(...scores[4]));
@@ -271,146 +330,62 @@ const ai = (()=> {
 						}
 					});
 				}
-				res.forEach((item)=> {
+				for (let i = 0; i < res.length; i++) {
 					copyData = util.cloneData(data);
-					copyData[item.pos.i][item.pos.j] = item.value;
+					copyData[res[i].pos.x][res[i].pos.y] = res[i].value;
 					dataMapping = local.dataMapping(copyData);
-
-					result = local.miniMaxXX(copyData, alpha, score, depth, !isPlayerTurn);
-
+					result = local.miniMax(copyData, alpha, score, depth, !isPlayerTurn);
 					if (score > result.score) {
 						score = result.score;
 					}
 					if (score < alpha) {
-						return { move: undefined, score: alpha };
+						cutOff++;
+						return { move: -1, score: alpha };
 					}
-
-				});
-
+				}
 			}
 
 			return { move: move, score: score };
 		};
 
-		local.miniMax = (node, depth, isPlayerTurn)=> {
-			let alpha = -Infinity, beta = Infinity, bestMove = -1,
-				children,
-				nodeData = local.dataRevert(node.mapping),
-				copyData,
-				dataMapping;
-
-			//玩家回合
-			if (isPlayerTurn) {
-				for (let direction of [global.ACTION_LEFT, global.ACTION_UP, global.ACTION_RIGHT, global.ACTION_DOWN]) {
-					copyData = util.cloneData(nodeData);
-					game.moveTo(direction, copyData, false);
-					game.resetGameArrayState();
-					dataMapping = local.dataMapping(copyData);
-					//该操作没有改变局面
-					if (dataMapping === node.mapping) {
-						children = local.createNode(dataMapping, node);
-					}
-					else {
-						//该局面已经搜索过
-						if (searchTree.has(dataMapping)) {
-							children = searchTree.get(dataMapping);
-						}
-						else {
-							children = local.createNode(dataMapping, node);
-							searchTree.set(dataMapping, children);
-						}
-					}
-					node.children.push(children);
-					if (!game.isGameOver(copyData)) {
-						if (children.value !== undefined) {
-							alpha = children.value;
-						}
-						else {
-							alpha = local.evaluation(copyData);
-							children.value = alpha;
-						}
-					}
-
-					children.alpha = Math.max(children.alpha, alpha);
-					if (node.alpha < children.alpha) {
-						bestMove = direction;
-						node.alpha = children.alpha;
-					}
-					//是否剪枝
-					// if (children.alpha < children.beta) {
-					// 	local.miniMax(children, depth + 1, !isPlayerTurn);
-					// }
-
-					//todo
-					local.miniMax(children, depth - 1, !isPlayerTurn);
-
-				}
-			}
-			//电脑回合
-			else {
-				let empty = [], res = {}, val;
-				copyData = util.cloneData(nodeData);
-				//找出所有空的
-				for (let i = 0; i < copyData.length; i++) {
-					for (let j = 0; j < copyData[i].length; j++) {
-						if (copyData[i][j] === global.CELL_DEFAULT) {
-							empty.push({i: i, j: j});
-						}
-					}
-				}
-				//每一个空的都尝试2或4
-				empty.forEach((item)=> {
-					for (let value of [2, 4]) {
-						copyData[item.i][item.j] = value;
-						val = local.evaluation(copyData);
-						if (val < beta) {
-							beta = val;
-							res.data = item;
-							res.value = value;
-						}
-						copyData[item.i][item.j] = global.CELL_DEFAULT;
-					}
-				});
-
-				copyData[res.data.i][res.data.j] = res.value;
-				dataMapping = local.dataMapping(copyData);
-				if (searchTree.has(dataMapping)) {
-					children = searchTree.get(dataMapping);
-				}
-				else {
-					children = local.createNode(dataMapping, node);
-					searchTree.set(dataMapping, children);
-				}
-				node.children.push(children);
-
-				children.beta = Math.min(children.beta, beta);
-				node.beta = Math.min(node.beta, children.beta);
-				//是否剪枝
-				// if (children.alpha < children.beta) {
-				// 	local.miniMax(children, depth + 1, !isPlayerTurn);
-				// }
-
-				//todo
-				local.miniMax(children, depth - 1, !isPlayerTurn);
-
-			}
-
-			return bestMove;
-		};
-
-		local.iterativeDepth = (data)=> {
-			let start = (new Date()).getTime(), depth = 1, bestMove;
+		local.iterativeDeepening = (data)=> {
+			let result, start = (new Date()).getTime(), end,
+				depth = 1, bestMove = -1, bestScore = -Infinity,
+				dataMapping = local.dataMapping(data);
 			do {
-				let newBest = local.miniMaxXX(data, -Infinity, Infinity, depth, true).move;
-				if (newBest === -1) {
+				cutOff = 0;
+				let alpha = -Infinity, beta = Infinity;
+				if (TT.has(dataMapping)) {
+					let val = TT.getValue(dataMapping);
+					if (val.type === "LOW") {
+						// alpha = val.value;
+
+						// beta = val.value;
+					}
+					if (val.type === "HIGH") {
+						// beta = val.value;
+
+						// alpha = val.value;
+					}
+				}
+				result = local.miniMax(data, bestScore, beta, depth, true);
+				if (result.move === -1) {
 					break;
 				}
 				else {
-					bestMove = newBest;
+					bestMove = result.move;
+					// bestScore = result.score;
+					if (depth < 3) {
+						// bestScore = result.score;
+					}
+					else {
+						// bestScore = -Infinity;
+					}
 				}
 				depth++;
-			} while ((new Date()).getTime() - start < global.AI_MAX_TIME);
-
+				end = (new Date()).getTime();
+			} while (end - start < global.AI_MAX_TIME);
+			util.log("time: ", end - start, "cutOff: ", cutOff, "depth: ", depth, "cacheTimes: ", cacheTimes);
 			return bestMove;
 		};
 
@@ -420,27 +395,24 @@ const ai = (()=> {
 	{
 
 		module.getBestMove = (data)=> {
-			let node, dataMapping;
-			dataMapping = local.dataMapping(data);
-			if (searchTree.has(dataMapping)) {
-				node = searchTree.get(dataMapping);
+			let move = local.iterativeDeepening(data);
+			if (move === -1) {
+				for (let direction of [global.GAME_ACTION_LEFT, global.GAME_ACTION_UP, global.GAME_ACTION_RIGHT, global.GAME_ACTION_DOWN]) {
+					if (game.isMovable(direction)) {
+						move = direction;
+						break;
+					}
+				}
 			}
-			else {
-				node = local.createNode(dataMapping, currentNode);
-				searchTree.set(dataMapping, node);
-			}
-			currentNode = node;
-			//todo
-			//return local.miniMaxXX(data, -Infinity, Infinity, 1, true).move;
-			return local.iterativeDepth(data);
+			return move;
 		};
 
 		/**
 		 * 初始化
 		 */
 		module.init = ()=> {
-			util.log("----------ai init----------");
-
+			TT = local.translationTable();
+			module.TT = TT;
 		};
 
 	}

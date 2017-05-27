@@ -1,14 +1,15 @@
 /*--------------------全局参数--------------------*/
 const global = {//jshint ignore: line
-	"CELL_MAX": 2048,//允许出现的最大数字
-	"CELL_DEFAULT": 0,//初始化的数字
-	"GRID_SIZE": 4,//网格的大小，4X4
-	"ACTION_LEFT": 1,//左
-	"ACTION_UP": 2,//上
-	"ACTION_RIGHT": 3,//右
-	"ACTION_DOWN": 4,//下
-	"ACTION_ALL": 5,//任意方向
-	"AI_MAX_TIME": 100//ai思考时间(单位: ms)
+	"GAME_CELL_MAX": 2048,//最大目标数字
+	"GAME_CELL_DEFAULT": 0,//初始化的数字
+	"GAME_GRID_SIZE": 4,//网格的大小，4X4
+	"GAME_ACTION_LEFT": 1,//左
+	"GAME_ACTION_UP": 2,//上
+	"GAME_ACTION_RIGHT": 3,//右
+	"GAME_ACTION_DOWN": 4,//下
+	"GAME_ACTION_ALL": 5,//任意方向
+	"AI_MAX_TIME": 120,//ai搜索深度(单位: ms)
+	"WORKER_MAX_THREAD": 3//worker最大数
 };
 /**
  * 全局模块
@@ -48,6 +49,28 @@ const util = (()=> {
 				});
 				result.push(items);
 			});
+			return result;
+		};
+
+		/**
+		 * clone一个对象
+		 * @param obj
+		 * @returns {*}
+		 */
+		module.clone = (obj)=> {
+			let result;
+			switch (typeof obj) {
+				case "number": case "string": case "boolean": result = obj; break;
+				case "object":
+					let o = {};
+					for (let key in obj) {
+						o[key] = module.clone(obj[key]);
+					}
+					result = o;
+					break;
+				default:
+					result = obj;
+			}
 			return result;
 		};
 

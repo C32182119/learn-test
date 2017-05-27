@@ -11,11 +11,13 @@
     <header>
         <h1>2048</h1>
         <div class="button-group">
-            <a id="start" href="javascript:main.start();">Start</a>
-            <a id="auto-play" href="javascript:main.auto();">AutoPlay</a>
+            <a class="menu-button" href="javascript:main.start();">Start</a>
+            <a class="menu-button" href="javascript:main.auto();">Auto</a>
+            <a class="menu-button" href="javascript:main.tooltip();">Tooltip</a>
         </div>
-        <!--<a href="javascript:autoPlay();" id="btn_autoplay">Auto Play</a>-->
-        <!--<p>score: <span id="score">0</span></p>-->
+        <div class="tooltip-content">
+            <p id="best-move"></p>
+        </div>
     </header>
     <div id="grid-container">
         <div class="grid-cell" id="grid-cell-0-0"></div>
